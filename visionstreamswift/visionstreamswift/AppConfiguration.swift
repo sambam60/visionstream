@@ -47,8 +47,11 @@ struct AppConfiguration: Codable, Equatable {
     var audioEnabled: Bool
 
     // Registered secrets
-    var rpRegistKeyHexPadded: String?
-    var rpKeyHex: String?
+    var rpRegistKeyBase64: String?
+    var rpKeyBase64: String?
+
+    // Derived convenience
+    var targetValue: Int { isPS5 ? 1_000_100 : 1_000 }
 
     static var `default`: AppConfiguration {
         .init(host: "",
@@ -60,15 +63,23 @@ struct AppConfiguration: Codable, Equatable {
               fps: .fps60,
               hdrEnabled: false,
               audioEnabled: true,
-              rpRegistKeyHexPadded: nil,
-              rpKeyHex: nil)
+              rpRegistKeyBase64: nil,
+              rpKeyBase64: nil)
     }
 
     mutating func load(from url: URL) {
         do {
             let data = try Data(contentsOf: url)
-            let decoded = try JSONDecoder().decode(AppConfiguration.self, from: data)
-            self = decoded
+            let decoder = JSONDecoder()
+            if let decoded = try? decoder.decode(AppConfiguration.self, from: data) {
+                self = decoded
+                return
+            }
+            // Fallback: parse legacy Chiaki/FlipScreen-style host map format
+            if let fallback = try? AppConfiguration.parseLegacyConfig(data: data) {
+                self = fallback
+                return
+            }
         } catch {
             // Keep current config on error
         }
@@ -76,6 +87,59 @@ struct AppConfiguration: Codable, Equatable {
 
     func document() -> AppConfigurationDocument {
         AppConfigurationDocument(configuration: self)
+    }
+}
+
+extension AppConfiguration {
+    private struct LegacyEntry: Decodable {
+        let psnAccountId: String?
+        let hostName: String?
+        let hostAddr: String?
+        let rpKey: String?
+        let rpKeyType: Int?
+        let psnOnlineId: String?
+        let videoWidth: Int?
+        let videoResolution: String?
+        let target: String?
+        let sessionPort: String?
+        let connectPort: String?
+        let videoHeight: Int?
+        let rpRegistKey: String?
+        let wakeUpPort: String?
+        let videoFps: Int?
+        let bitRate: Int?
+    }
+
+    static func parseLegacyConfig(data: Data) throws -> AppConfiguration {
+        let raw = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        guard let (_, value) = raw?.first else { throw NSError(domain: "config", code: 1) }
+        let valueData = try JSONSerialization.data(withJSONObject: value)
+        let entry = try JSONDecoder().decode(LegacyEntry.self, from: valueData)
+
+        var cfg = AppConfiguration.default
+        cfg.host = entry.hostAddr ?? entry.hostName ?? cfg.host
+        cfg.isPS5 = { if let t = entry.target, let tv = Int(t) { return tv >= 1_000_000 } else { return cfg.isPS5 } }()
+        cfg.psnOnlineId = entry.psnOnlineId
+        cfg.psnAccountIdBase64 = entry.psnAccountId
+        if let br = entry.bitRate { cfg.bitrateKbps = br }
+        if let vf = entry.videoFps, let fps = AppConfiguration.FPS(rawValue: vf) { cfg.fps = fps }
+        if let res = entry.videoResolution?.lowercased() {
+            switch res {
+            case "360p": cfg.resolution = .p360
+            case "540p": cfg.resolution = .p540
+            case "720p": cfg.resolution = .p720
+            case "1080p": cfg.resolution = .p1080
+            default: break
+            }
+        } else if let w = entry.videoWidth, let h = entry.videoHeight {
+            if w >= 1920 || h >= 1080 { cfg.resolution = .p1080 }
+            else if w >= 1280 || h >= 720 { cfg.resolution = .p720 }
+            else if w >= 960 || h >= 540 { cfg.resolution = .p540 }
+            else { cfg.resolution = .p360 }
+        }
+        cfg.rpKeyBase64 = entry.rpKey
+        cfg.rpRegistKeyBase64 = entry.rpRegistKey
+        return cfg
     }
 }
 

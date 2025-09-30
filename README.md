@@ -1,63 +1,142 @@
 
 ![Chiaki Logo](assets/chiaki_wide.png)
 
-# Chiaki
+# VisionStream
 
 **Disclaimer:** This project is not endorsed or certified by Sony Interactive Entertainment LLC.
 
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/c81ogebvsmo43dd3?svg=true)](https://ci.appveyor.com/project/thestr4ng3r/chiaki) [![builds.sr.ht Status](https://builds.sr.ht/~thestr4ng3r/chiaki.svg)](https://builds.sr.ht/~thestr4ng3r/chiaki?)
 
-Chiaki is a Free and Open Source Software Client for PlayStation 4 and PlayStation 5 Remote Play
-for Linux, FreeBSD, OpenBSD, Android, macOS, Windows, Nintendo Switch and potentially even more platforms.
+VisionStream is a free, native, open source PS5 streaming app for visionOS that uses Chiaki. This project extends the original Chiaki codebase to provide PlayStation Remote Play functionality specifically optimized for Apple Vision Pro.
+
+Based on the excellent [Chiaki](https://git.sr.ht/~thestr4ng3r/chiaki) project, VisionStream brings PlayStation 5 Remote Play to visionOS with native SwiftUI interfaces and spatial computing optimizations.
 
 ![Screenshot](assets/screenshot.png)
 
 ## Project Status
 
-As all relevant features are implemented, this project is considered to be finished and in maintenance mode only.
-No major updates are planned and contributions are only accepted in special cases.
+VisionStream is currently in active development for visionOS. This project extends the original Chiaki codebase to provide native PlayStation Remote Play functionality on Apple Vision Pro.
+
+**Note:** The original Chiaki project is in maintenance mode, but VisionStream represents an active development effort to bring PlayStation streaming to visionOS.
 
 ## Installing
 
-You can either download a pre-built release or build Chiaki from source.
-
-### Downloading a Release
-
-Builds are provided for Linux, Android, macOS, Nintendo Switch and Windows.
-
-You can download them [here](https://git.sr.ht/~thestr4ng3r/chiaki/refs).
-
-* **Linux**: The provided file is an [AppImage](https://appimage.org/). Simply make it executable (`chmod +x <file>.AppImage`) and run it.
-* **Android**: Install from [Google Play](https://play.google.com/store/apps/details?id=com.metallic.chiaki), [F-Droid](https://f-droid.org/packages/com.metallic.chiaki/) or download the APK from Sourcehut.
-* **macOS**: Drag the application from the `.dmg` into your Applications folder.
-* **Windows**: Extract the `.zip` file and execute `chiaki.exe`.
-* **Switch**: Download the `.nro` file and copy it into the `switch/` directory on your SD card.
+VisionStream is built for visionOS and requires Apple Vision Pro. You can build the project from source using Xcode.
 
 ### Building from Source
 
-Dependencies are CMake, Qt 5 with QtMultimedia, QtOpenGL and QtSvg, FFMPEG (libavcodec with H264 is enough), libopus, OpenSSL 1.1, SDL 2,
-protoc and the protobuf Python library (only used during compilation for Nanopb). Then, Chiaki builds just like any other CMake project:
-```
-git submodule update --init
-mkdir build && cd build
-cmake ..
-make
-```
+**Requirements:**
+- Apple Vision Pro or visionOS Simulator
+- Xcode 15.0 or later
+- visionOS SDK
 
-For more detailed platform-specific instructions, see [doc/platform-build.md](doc/platform-build.md) or [switch/](./switch/README.md) for Nintendo Switch.
+**Build Instructions:**
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/visionstream.git
+   cd visionstream
+   ```
+
+2. Open the project in Xcode:
+   ```bash
+   open visionstreamswift/visionstreamswift.xcodeproj
+   ```
+
+3. Select your target device (Apple Vision Pro or Simulator)
+4. Build and run the project (⌘+R)
+
+### Original Chiaki Platforms
+
+The original Chiaki project supports Linux, FreeBSD, OpenBSD, Android, macOS, Windows, and Nintendo Switch. You can download pre-built releases [here](https://git.sr.ht/~thestr4ng3r/chiaki/refs).
 
 ## Usage
 
-If your Console is on your local network, is turned on or in standby mode and does not have Discovery explicitly disabled, Chiaki should find it.
-Otherwise, you can add it manually.
-To do so, click the "+" icon in the top right, and enter your Console's IP address.
+VisionStream provides a native visionOS experience for PlayStation Remote Play. The app uses spatial computing features to create an immersive gaming environment on Apple Vision Pro.
 
-You will then need to register your Console with Chiaki. You will need two more pieces of information to do this.
+### Getting Started
+
+1. **Network Discovery**: If your PlayStation 5 is on your local network and in standby mode, VisionStream should automatically discover it.
+
+2. **Manual Setup**: If automatic discovery doesn't work, you can manually add your console by entering its IP address.
+
+3. **Registration**: You'll need to register your console with VisionStream using your PSN Account ID and a registration PIN.
+
+### visionOS Features
+
+- **Spatial Gaming**: Play PlayStation games in your physical space using Apple Vision Pro's spatial computing
+- **Native Interface**: Built with SwiftUI for optimal visionOS integration
+- **Immersive Experience**: Leverage Vision Pro's high-resolution displays for crisp gameplay
+
+## Optimizing Performance: Ethernet + Internet Sharing Setup
+
+For the best streaming performance with VisionStream, you can create a dedicated high-speed network using your Mac as a bridge. This setup minimizes latency and maximizes bandwidth for PlayStation Remote Play.
+
+### Prerequisites
+- Mac with Ethernet port
+- PlayStation 5 with Ethernet connection
+- Both devices on the same local network
+- Apple Vision Pro
+
+### Step-by-Step Setup
+
+1. **Connect Both Devices to Ethernet**
+   - Connect your PlayStation 5 to your router via Ethernet cable
+   - Connect your Mac to the same router via Ethernet cable
+   - Ensure both devices are on the same local area network (LAN)
+
+2. **Enable Internet Sharing on macOS**
+   - Open **System Settings** (or System Preferences on older macOS versions)
+   - Navigate to **General** → **Sharing**
+   - Find and enable **Internet Sharing**
+   - If you don't see it, click the **+** button to add it
+
+3. **Configure Internet Sharing**
+   - **Share your connection from**: Select your Ethernet connection (usually named "Ethernet" or similar)
+   - **To computers using**: Select **Wi-Fi**
+   - Click **Wi-Fi Options...** to configure the hotspot
+
+4. **Set Up Wi-Fi Hotspot**
+   - **Network Name**: Create a memorable name (e.g., "PS5-VisionStream")
+   - **Channel**: Choose **44** (5GHz), **11**, or **6** in order of preference
+     - Channel 44 is recommended as it's a 5GHz channel with less interference
+   - **Security**: Set a strong password
+   - Click **OK** to save settings
+
+5. **Connect Vision Pro**
+   - On your Apple Vision Pro, go to **Settings** → **Wi-Fi**
+   - Connect to the hotspot you just created
+   - Enter the password when prompted
+
+6. **Manual PS5 Connection**
+   - Due to Network Address Translation (NAT), automatic discovery may not work
+   - In VisionStream, manually add your PS5 using its IP address
+   - You can find your PS5's IP address in: **Settings** → **Network** → **View Connection Status**
+
+### Benefits
+- **Reduced Latency**: Direct connection path minimizes network hops
+- **Higher Bandwidth**: Dedicated 5GHz channel provides optimal throughput
+- **Stable Connection**: Ethernet backbone ensures consistent performance
+- **Lower Interference**: Dedicated network reduces congestion from other devices
+
+### Troubleshooting
+- If connection is unstable, try different Wi-Fi channels (44, 11, or 6)
+- Ensure your Mac's Wi-Fi is disabled to prevent conflicts
+- Check that both devices show strong signal strength
+- Verify PS5 is in standby mode or powered on
 
 ### Obtaining your PSN AccountID
 
 Starting with PS4 7.0, it is necessary to use a so-called "AccountID" as opposed to the "Online-ID" for registration (streaming itself did not change).
-This ID seems to be a unique identifier for a PSN Account and it can be obtained from the PSN after logging in using OAuth.
+This ID seems to be a unique identifier for a PSN Account.
+
+#### Easy Method (Recommended)
+1. Visit [https://psn.flipscreen.games/](https://psn.flipscreen.games/)
+2. Enter your PlayStation Network username (Online ID)
+3. Click "Submit" to search PSN
+4. Copy the **Chiaki Account ID** from the results
+5. **Note:** Your privacy settings need to allow "Anyone" to find you in search. You can change this back once you have your Account ID.
+
+#### Alternative Method (Command Line)
 A Python 3 script which does this is provided in [scripts/psn-account-id.py](scripts/psn-account-id.py).
 Simply run it in a terminal and follow the instructions. Once you know your ID, write it down. You will likely never have to do this process again.
 
@@ -83,7 +162,9 @@ extremely helpful information about FEC and error correction.
 
 ## About
 
-Created by Florian Märkl
+VisionStream is a visionOS adaptation of Chiaki, created to bring PlayStation Remote Play to Apple Vision Pro.
+
+**Original Chiaki Project:** Created by Florian Märkl
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3

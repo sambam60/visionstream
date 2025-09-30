@@ -20,8 +20,6 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
-                Model3D(named: "Scene", bundle: realityKitContentBundle)
-                    .frame(height: 180)
 
                 VStack(spacing: 12) {
                     Button("Settings") { showSettings = true }
@@ -43,7 +41,7 @@ struct ContentView: View {
                     Button("Pair / Register Console") { showPairing = true }
                 }
 
-                ToggleImmersiveSpaceButton()
+                // immersive space removed for now
             }
             .padding()
             .navigationTitle("VisionStream")

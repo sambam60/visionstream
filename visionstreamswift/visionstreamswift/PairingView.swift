@@ -35,8 +35,8 @@ struct PairingView: View {
                 }
 
                 Section("PSN Identity") {
-                    TextField("PSN Online ID (PS4 < 7)", text: $psnOnlineId)
-                    TextField("PSN Account ID Base64 (PS4 >= 7 / PS5)", text: $psnAccountIdBase64)
+                    TextField("PSN Online ID (username)", text: $psnOnlineId)
+                    TextField("Chiaki-encoded Account ID (base64)", text: $psnAccountIdBase64)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 }
@@ -64,8 +64,8 @@ struct PairingView: View {
 
     var canRegister: Bool {
         guard !appModel.configuration.host.isEmpty, pin.count == 8 else { return false }
-        if appModel.configuration.isPS5 { return !psnAccountIdBase64.isEmpty }
-        return !psnOnlineId.isEmpty || !psnAccountIdBase64.isEmpty
+        // Require both identifiers for robustness
+        return !psnOnlineId.isEmpty && !psnAccountIdBase64.isEmpty
     }
 
     func register() {
@@ -81,8 +81,9 @@ struct PairingView: View {
                 inProgress = false
                 switch result {
                 case .success(let secrets):
-                    appModel.configuration.rpRegistKeyHexPadded = secrets.rpRegistKeyHexPadded
-                    appModel.configuration.rpKeyHex = secrets.rpKeyHex
+                    // Convert hex strings from shim to base64 for storage
+                    appModel.configuration.rpRegistKeyBase64 = Data(hexString: secrets.rpRegistKeyHexPadded)?.base64EncodedString()
+                    appModel.configuration.rpKeyBase64 = Data(hexString: secrets.rpKeyHex)?.base64EncodedString()
                     dismiss()
                 case .failure:
                     // Keep the sheet open; in a later pass show error
