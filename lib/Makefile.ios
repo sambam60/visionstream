@@ -1,0 +1,54 @@
+# Minimal Makefile for building libchiaki.a for visionOS/iOS
+# This builds only the core protocol without OpenSSL/Opus/FFmpeg dependencies
+
+CC = clang
+AR = ar
+CFLAGS = -arch arm64 -isysroot $(shell xcrun --sdk xros --show-sdk-path) \
+         -Iinclude -I../third-party/nanopb -DCHIAKI_LIB_ENABLE_MBEDTLS=0
+
+SOURCES = \
+	src/log.c \
+	src/thread.c \
+	src/stoppipe.c \
+	src/time.c \
+	src/sock.c \
+	src/http.c \
+	src/base64.c \
+	src/regist.c \
+	src/ctrl.c \
+	src/takion.c \
+	src/streamconnection.c \
+	src/session.c \
+	src/congestioncontrol.c \
+	src/feedback.c \
+	src/feedbacksender.c \
+	src/launchspec.c \
+	src/takionsendbuffer.c \
+	src/reorderqueue.c \
+	src/videoreceiver.c \
+	src/audioreceiver.c \
+	src/frameprocessor.c \
+	src/packetstats.c \
+	src/discovery.c \
+	src/discoveryservice.c \
+	src/senkusha.c \
+	src/audio.c \
+	src/controller.c \
+	src/orientation.c \
+	src/stubs_ios.c
+
+OBJECTS = $(SOURCES:.c=.o)
+
+all: libchiaki.a
+
+libchiaki.a: $(OBJECTS)
+	$(AR) rcs $@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(OBJECTS) libchiaki.a
+
+.PHONY: all clean
+

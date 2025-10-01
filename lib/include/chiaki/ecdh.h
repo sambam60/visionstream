@@ -12,9 +12,11 @@
 extern "C" {
 #endif
 
-#ifdef CHIAKI_LIB_ENABLE_MBEDTLS
+#if CHIAKI_LIB_ENABLE_MBEDTLS
 #include "mbedtls/ecdh.h"
 #include "mbedtls/ctr_drbg.h"
+#else
+#include "../stub_ecdh_types.h"
 #endif
 
 
@@ -25,7 +27,7 @@ typedef struct chiaki_ecdh_t
 // the following lines may lead to memory corruption
 // CHIAKI_LIB_ENABLE_MBEDTLS must be defined
 // globally (whole project)
-#ifdef CHIAKI_LIB_ENABLE_MBEDTLS
+#if CHIAKI_LIB_ENABLE_MBEDTLS
 	// mbedtls ecdh context
 	mbedtls_ecdh_context ctx;
 	// deterministic random bit generator
@@ -33,6 +35,7 @@ typedef struct chiaki_ecdh_t
 #else
 	struct ec_group_st *group;
 	struct ec_key_st *key_local;
+	uint8_t local_pub_key[65]; // Store public key
 #endif
 } ChiakiECDH;
 

@@ -17,6 +17,7 @@ typedef metal::int32_t EnumBackingType;
 #else
 #import <Foundation/Foundation.h>
 #import "ChiakiShim.h"
+#import "ChiakiShimStreaming.h"
 typedef NSInteger EnumBackingType;
 #endif
 

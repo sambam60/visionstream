@@ -69,6 +69,12 @@ struct PairingView: View {
     }
 
     func register() {
+        print("🔐 [PairingView] Starting registration...")
+        print("   Host: \(appModel.configuration.host)")
+        print("   PS5: \(appModel.configuration.isPS5)")
+        print("   PSN Online ID: \(psnOnlineId)")
+        print("   PSN Account ID (first 10 chars): \(String(psnAccountIdBase64.prefix(10)))...")
+        
         inProgress = true
         appModel.configuration.psnOnlineId = psnOnlineId.isEmpty ? nil : psnOnlineId
         appModel.configuration.psnAccountIdBase64 = psnAccountIdBase64.isEmpty ? nil : psnAccountIdBase64
@@ -81,11 +87,28 @@ struct PairingView: View {
                 inProgress = false
                 switch result {
                 case .success(let secrets):
+                    print("✅ [PairingView] Registration successful!")
+                    print("   rpRegistKeyHexPadded: \(secrets.rpRegistKeyHexPadded)")
+                    print("   rpKeyHex: \(secrets.rpKeyHex)")
+                    
                     // Convert hex strings from shim to base64 for storage
-                    appModel.configuration.rpRegistKeyBase64 = Data(hexString: secrets.rpRegistKeyHexPadded)?.base64EncodedString()
-                    appModel.configuration.rpKeyBase64 = Data(hexString: secrets.rpKeyHex)?.base64EncodedString()
+                    let registKeyData = Data(hexString: secrets.rpRegistKeyHexPadded)
+                    let rpKeyData = Data(hexString: secrets.rpKeyHex)
+                    
+                    print("   Converted to Data:")
+                    print("   - registKeyData: \(registKeyData != nil ? "\(registKeyData!.count) bytes" : "nil")")
+                    print("   - rpKeyData: \(rpKeyData != nil ? "\(rpKeyData!.count) bytes" : "nil")")
+                    
+                    appModel.configuration.rpRegistKeyBase64 = registKeyData?.base64EncodedString()
+                    appModel.configuration.rpKeyBase64 = rpKeyData?.base64EncodedString()
+                    
+                    print("   Saved to config:")
+                    print("   - rpRegistKeyBase64: \(appModel.configuration.rpRegistKeyBase64 ?? "nil")")
+                    print("   - rpKeyBase64: \(appModel.configuration.rpKeyBase64 ?? "nil")")
+                    
                     dismiss()
-                case .failure:
+                case .failure(let error):
+                    print("❌ [PairingView] Registration failed: \(error)")
                     // Keep the sheet open; in a later pass show error
                     break
                 }

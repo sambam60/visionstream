@@ -3,3 +3,6 @@ alwaysApply: true
 ---
 
 Use ExaAI and web search to find up to date visionOS documentation. public user made blogs and Apple Developer documentation are the most reliable https://developer.apple.com/documentation/visionOS. This project uses Metal 4, so use the documentation on Metal 4 to use the API https://developer.apple.com/documentation/metal/using-the-metal-4-compilation-api
+
+
+build command: cd /Users/samsmith/Desktop/visionstream/visionstreamswift && xcodebuild -scheme visionstreamswift -destination generic/platform=visionOS build 2>&1 | grep "error:" | head -[CHOOSE BEST VALUE FOR HEAD]

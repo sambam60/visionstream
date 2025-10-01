@@ -24,6 +24,22 @@ struct AppConfiguration: Codable, Equatable {
             case .p1080: return "1080p"
             }
         }
+        var width: Int {
+            switch self {
+            case .p360: return 640
+            case .p540: return 960
+            case .p720: return 1280
+            case .p1080: return 1920
+            }
+        }
+        var height: Int {
+            switch self {
+            case .p360: return 360
+            case .p540: return 540
+            case .p720: return 720
+            case .p1080: return 1080
+            }
+        }
     }
 
     enum FPS: Int, Codable, CaseIterable, Identifiable {
