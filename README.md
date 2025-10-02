@@ -1,17 +1,13 @@
 
-![Chiaki Logo](assets/chiaki_wide.png)
-
 # VisionStream
 
 **Disclaimer:** This project is not endorsed or certified by Sony Interactive Entertainment LLC.
 
-[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/c81ogebvsmo43dd3?svg=true)](https://ci.appveyor.com/project/thestr4ng3r/chiaki) [![builds.sr.ht Status](https://builds.sr.ht/~thestr4ng3r/chiaki.svg)](https://builds.sr.ht/~thestr4ng3r/chiaki?)
+
 
 VisionStream is a free, native, open source PS5 streaming app for visionOS that uses Chiaki. This project extends the original Chiaki codebase to provide PlayStation Remote Play functionality specifically optimized for Apple Vision Pro.
 
 Based on the excellent [Chiaki](https://git.sr.ht/~thestr4ng3r/chiaki) project, VisionStream brings PlayStation 5 Remote Play to visionOS with native SwiftUI interfaces and spatial computing optimizations.
-
-![Screenshot](assets/screenshot.png)
 
 ## Project Status
 
@@ -142,8 +138,8 @@ Simply run it in a terminal and follow the instructions. Once you know your ID, 
 
 ### Obtaining a Registration PIN
 
-To register a Console with a PIN, it must be put into registration mode. To do this on a PS4, simply go to:
-Settings -> Remote Play -> Add Device, or on a PS5: Settings -> System -> Remote Play -> Link Device.
+To register a Console with a PIN, it must be put into registration mode. To do this on a PS5, simply go to:
+Settings -> Remote Play -> Pair Device, or on a PS4: Settings -> System -> Remote Play -> Add Device.
 
 You can now double-click your Console in Chiaki's main window to start Remote Play.
 
@@ -155,10 +151,9 @@ This project has only been made possible because of the following Open Source pr
 [Frida](https://www.frida.re) and
 [x64dbg](https://x64dbg.com).
 
-Also thanks to [delroth](https://github.com/delroth) for analyzing the registration and wakeup protocol,
-[grill2010](https://github.com/grill2010) for analyzing the PSN's OAuth Login,
-as well as a huge thank you to [FioraAeterna](https://github.com/FioraAeterna) for giving me some
-extremely helpful information about FEC and error correction.
+[delroth](https://github.com/delroth) - registration and wakeup protocol,
+[grill2010](https://github.com/grill2010) - analyzing the PSN's OAuth Login,
+[FioraAeterna](https://github.com/FioraAeterna) - FEC and error correction.
 
 ## About
 
