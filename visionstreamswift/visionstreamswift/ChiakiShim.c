@@ -32,6 +32,7 @@ static void log_stream(const char *format, ...) {
 #include <chiaki/rpcrypt.h>
 #include <chiaki/regist.h>
 #include <chiaki/session.h>
+#include <chiaki/base64.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -101,75 +102,8 @@ CHIAKI_EXPORT const char *chiaki_codec_name(ChiakiCodec codec)
         default: return "unknown";
     }
 }
-#include "../../lib/src/log.c"
-#include "../../lib/src/thread.c"
-#include "../../lib/src/stoppipe.c"
-#include "../../lib/src/time.c"
-#include "../../lib/src/sock.c"
-#include "../../lib/src/http.c"
-#include "../../lib/src/base64.c"
-// Provide a trivial RNG to avoid OpenSSL dependency in random.c
-CHIAKI_EXPORT ChiakiErrorCode chiaki_random_bytes_crypt(uint8_t *buf, size_t buf_size) {
-    for(size_t i=0;i<buf_size;i++) buf[i] = (uint8_t)(rand() & 0xFF);
-    return CHIAKI_ERR_SUCCESS;
-}
-// Provide a minimal ECDH that fails fast to allow request building paths that may not use it for regist
-CHIAKI_EXPORT ChiakiErrorCode chiaki_ecdh_init(ChiakiECDH *ecdh) { (void)ecdh; return CHIAKI_ERR_UNKNOWN; }
-CHIAKI_EXPORT void chiaki_ecdh_fini(ChiakiECDH *ecdh) { (void)ecdh; }
-// Remove rpcrypt.c include; provide minimal implementation
-CHIAKI_EXPORT void chiaki_rpcrypt_bright_ambassador(ChiakiTarget target, uint8_t *bright, uint8_t *ambassador, const uint8_t *nonce, const uint8_t *morning) {
-    // Use the PS4 pre10 path logic used by regist.c when target < PS4_10
-    static const uint8_t echo_a[] = { 0x01, 0x49, 0x87, 0x9b, 0x65, 0x39, 0x8b, 0x39, 0x4b, 0x3a, 0x8d, 0x48, 0xc3, 0x0a, 0xef, 0x51 };
-    static const uint8_t echo_b[] = { 0xe1, 0xec, 0x9c, 0x3a, 0xdd, 0xbd, 0x08, 0x85, 0xfc, 0x0e, 0x1d, 0x78, 0x90, 0x32, 0xc0, 0x04 };
-    for(uint8_t i=0;i<CHIAKI_RPCRYPT_KEY_SIZE;i++){ uint8_t v=nonce[i]; v-=i; v-=0x27; v^=echo_a[i]; ambassador[i]=v; }
-    for(uint8_t i=0;i<CHIAKI_RPCRYPT_KEY_SIZE;i++){ uint8_t v=morning[i]; v-=i; v+=0x34; v^=echo_b[i]; v^=nonce[i]; bright[i]=v; }
-}
-
-CHIAKI_EXPORT void chiaki_rpcrypt_aeropause_ps4_pre10(uint8_t *aeropause, const uint8_t *ambassador) {
-    // Simple reversible mapping used only for PS4 pre10 in regist
-    for(size_t i=0;i<16;i++) aeropause[i] = ambassador[i] ^ 0xAA;
-}
-
-CHIAKI_EXPORT void chiaki_rpcrypt_init_auth(ChiakiRPCrypt *rpcrypt, ChiakiTarget target, const uint8_t *nonce, const uint8_t *morning) {
-    rpcrypt->target = target;
-    chiaki_rpcrypt_bright_ambassador(target, rpcrypt->bright, rpcrypt->ambassador, nonce, morning);
-}
-
-CHIAKI_EXPORT void chiaki_rpcrypt_init_regist_ps4_pre10(ChiakiRPCrypt *rpcrypt, const uint8_t *ambassador, uint32_t pin) {
-    (void)pin; // not needed for this simplified path
-    memcpy(rpcrypt->ambassador, ambassador, CHIAKI_RPCRYPT_KEY_SIZE);
-}
-
-CHIAKI_EXPORT ChiakiErrorCode chiaki_rpcrypt_init_regist(ChiakiRPCrypt *rpcrypt, ChiakiTarget target, const uint8_t *ambassador, size_t key_0_off, uint32_t pin) {
-    (void)key_0_off; (void)pin;
-    rpcrypt->target = target;
-    memcpy(rpcrypt->ambassador, ambassador, CHIAKI_RPCRYPT_KEY_SIZE);
-    memset(rpcrypt->bright, 0, CHIAKI_RPCRYPT_KEY_SIZE);
-    return CHIAKI_ERR_SUCCESS;
-}
-
-CHIAKI_EXPORT ChiakiErrorCode chiaki_rpcrypt_generate_iv(ChiakiRPCrypt *rpcrypt, uint8_t *iv, uint64_t counter) {
-    (void)rpcrypt; for(size_t i=0;i<16;i++){ iv[i]=(uint8_t)((counter>>((i%8)*8))&0xFF);} return CHIAKI_ERR_SUCCESS;
-}
-
-CHIAKI_EXPORT ChiakiErrorCode chiaki_rpcrypt_encrypt(ChiakiRPCrypt *rpcrypt, uint64_t counter, const uint8_t *in, uint8_t *out, size_t sz) {
-    uint8_t iv[16]; chiaki_rpcrypt_generate_iv(rpcrypt, iv, counter);
-    for(size_t i=0;i<sz;i++) out[i] = in[i] ^ iv[i%16] ^ rpcrypt->ambassador[i%16];
-    return CHIAKI_ERR_SUCCESS;
-}
-
-CHIAKI_EXPORT ChiakiErrorCode chiaki_rpcrypt_decrypt(ChiakiRPCrypt *rpcrypt, uint64_t counter, const uint8_t *in, uint8_t *out, size_t sz) {
-    return chiaki_rpcrypt_encrypt(rpcrypt, counter, in, out, sz);
-}
-
-CHIAKI_EXPORT ChiakiErrorCode chiaki_rpcrypt_aeropause(ChiakiTarget target, size_t key_1_off, uint8_t *aeropause, const uint8_t *ambassador) {
-    (void)target;
-    for(size_t i=0;i<16;i++) aeropause[i] = ambassador[i] ^ (uint8_t)((key_1_off + i) & 0xFF) ^ 0x5A;
-    return CHIAKI_ERR_SUCCESS;
-}
-
-// chiaki_rp_version_string and chiaki_rp_application_reason_string are now provided by libchiaki.a
-// regist.c is also now part of libchiaki.a, so we don't include it here anymore
+// All crypto (ECDH/RPCrypt), RNG, and core functions are provided by libchiaki.a
+// Do not include or reimplement any lib/src/*.c here.
 
 // ========== Note: Full streaming implementation now lives in libchiaki.a ==========
 // We just need to call chiaki_session_* functions from Swift wrapper below
